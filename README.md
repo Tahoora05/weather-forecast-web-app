@@ -40,7 +40,7 @@ This project was developed to apply my web development skills and learn how to i
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/Tahoora05/weather-forecast-web-app.git
+(https://github.com/Tahoora05/weather-forecast-web-app.git)
    ```
 
 2. Open the project folder.
