@@ -1,0 +1,23 @@
+{
+  "name": "Weather Some",
+  "short_name": "WeatherSome",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#a18cd1",
+  "theme_color": "#a18cd1",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icons/sun.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/sun.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

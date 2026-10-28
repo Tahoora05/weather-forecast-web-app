@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+ <title>Weather Some Pro</title>
+ 
+ <link rel="manifest" href="manifest.json">
+ <meta name="theme-color" content="#a18cd1">
+ <meta name="apple-mobile-web-app-capable" content="yes">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+ <link rel="apple-touch-icon" href="assets/icons/sun.svg">
+ 
+ <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+ 
+ <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+ 
+ <link rel="stylesheet" href="style.css">
+</head>
+<body>
+ 
+ <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+     <div class="loader"></div>
+ </div>
+ 
+ <div class="bg-shape shape-1"></div>
+ <div class="bg-shape shape-2"></div>
+ 
+ <nav class="navbar">
+   <div class="logo">Weather Some <span style="font-size:0.5em; opacity:0.6; vertical-align: super;">PRO</span></div>
+   
+   <div class="nav-controls">
+       <button class="unit-toggle" id="unitToggle">°C / °F</button>
+       <button class="toggle-theme" id="themeToggle">
+           <span class="icon">🌙</span> <span class="text">Dark</span>
+       </button>
+   </div>
+ </nav>
+ 
+ <div class="app-container">
+   
+   <div class="landing-section fade-in show" id="landingSection">
+     <div class="hero-icon-wrapper">
+       <img src="assets/icons/sun.svg" alt="Weather Some" class="hero-icon floating">
+     </div>
+     <h2 id="greetingMsg" style="font-weight: 600; opacity: 0.9; margin-bottom: 5px;">Hello there!</h2>
+     <h1 class="main-title">Weather Some</h1>
+     <p class="subtitle">Your daily forecast, simply beautiful.</p>
+   </div>
+ 
+   <div class="search-section-wrapper">
+       <div class="search-container">
+         <input type="text" id="cityInput" placeholder="Search city (e.g., Mumbai)...">
+         
+         <div class="input-icons">
+             <i class="fa-solid fa-microphone" id="micBtn" title="Voice Search"></i>
+             <i class="fa-regular fa-heart" id="favBtn" title="Save to Favorites"></i>
+         </div>
+ 
+         <button id="locationBtn" title="Use My Location"><i class="fa-solid fa-location-crosshairs"></i></button>
+         <button id="searchBtn"><i class="fa-solid fa-magnifying-glass"></i></button>
+       </div>
+ 
+       <select id="favDropdown" class="fav-dropdown" style="display: none;">
+           <option value="" disabled selected>❤ Saved Cities</option>
+       </select>
+   </div>
+ 
+   <div class="dashboard-container" id="dashboardContainer" style="display: none;">
+     
+     <div class="today-container fade-in" id="todayContainer">
+       <div class="weather-scene" id="weatherScene">
+           <div class="scene-gradient"></div>
+           <div class="sun-orb"></div>
+           <div class="cloud cloud-1"></div>
+           <div class="cloud cloud-2"></div>
+           <div class="moon-orb"></div>
+           <div class="star star-1"></div>
+           <div class="star star-2"></div>
+           <div class="star star-3"></div>
+           <div class="shooting-star"></div>
+           <div class="hill"></div>
+       </div>
+ 
+       <div class="today-content" style="position: relative; z-index: 2;">
+           <div class="current-weather-section" id="currentWeatherSection"></div>
+           
+           <div class="chart-wrapper">
+               <canvas id="tempChart"></canvas>
+           </div>
+           
+           <h4 class="section-heading" style="margin-top:20px; color: inherit; opacity: 0.9;">Hourly Details</h4>
+           <div class="hourly-container" id="hourlyContainer"></div>
+       </div>
+     </div>
+ 
+     <div class="top-features-grid fade-in">
+         
+         <div class="glass-card event-planner" style="padding: 25px;">
+             <div class="planner-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                 <h3 style="font-size:1.1rem; opacity:0.9;"><i class="fa-solid fa-calendar-check" style="color:#f39c12; margin-right:8px;"></i> Event Planner</h3>
+                 <p style="font-size:0.8rem; opacity:0.7;">Is it a good idea?</p>
+             </div>
+             
+             <div class="planner-controls">
+                 <select id="eventActivity">
+                     <option value="cricket">🏏 Cricket Match</option>
+                     <option value="wedding">💍 Outdoor Wedding</option>
+                     <option value="hiking">🥾 Hiking / Trekking</option>
+                     <option value="bbq">🍔 BBQ / Picnic</option>
+                     <option value="drive">🚗 Long Drive</option>
+                 </select>
+                 
+                 <select id="eventDay">
+                     <option value="0">Today</option>
+                     <option value="1">Tomorrow</option>
+                     <option value="2">Day After Tomorrow</option>
+                 </select>
+                 
+                 <button id="checkEventBtn">Check Status</button>
+             </div>
+             
+             <div id="eventResult" class="event-result" style="display:none; margin-top:15px; padding:15px; border-radius:15px; font-weight:600; text-align:center;"></div>
+         </div>
+
+         <div class="highlight-card community-card">
+             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                 <h3><i class="fa-solid fa-users" style="color:#ff9f43; margin-right:8px;"></i> Community Report</h3>
+                 <span style="font-size:0.75rem; opacity:0.7;">Is it accurate?</span>
+             </div>
+             <p style="font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8;">The forecast says <span id="communityCurrentStatus">...</span>. What do you see?</p>
+             <div class="vote-buttons">
+                 <button class="vote-btn" onclick="voteWeather('Sunny')">☀️ Sunny</button>
+                 <button class="vote-btn" onclick="voteWeather('Cloudy')">☁️ Cloudy</button>
+                 <button class="vote-btn" onclick="voteWeather('Rainy')">🌧️ Rain</button>
+                 <button class="vote-btn" onclick="voteWeather('Stormy')">⛈️ Storm</button>
+             </div>
+             <p id="voteResult" style="margin-top: 15px; font-weight: 600; font-size: 0.9rem; color: #4caf50; text-align: center; min-height: 1.2em;"></p>
+         </div>
+
+         <div class="highlight-card smart-card">
+             <h3><i class="fa-solid fa-wand-magic-sparkles"></i> Daily Insight</h3>
+             <div class="smart-content">
+                 <p id="smartText">Analyzing conditions...</p>
+             </div>
+         </div>
+
+     </div>
+ 
+     <div class="highlights-grid fade-in" id="highlightsContainer">
+       
+       <div class="highlight-card wind-card">
+         <h3>Wind Status</h3>
+         <div class="icon-wrapper"><img src="assets/icons/wind.svg" class="spin-icon"></div>
+         <div class="data-wrapper">
+           <p class="big-data" id="windSpeed">--</p>
+           <p class="sub-data" id="windDir">Direction: --</p>
+         </div>
+       </div>
+ 
+       <div class="highlight-card atmosphere-card">
+           <h3>Atmosphere</h3>
+           <div class="atmos-details">
+               <div class="atmos-item">
+                   <i class="fa-solid fa-droplet"></i>
+                   <div><span class="label">Humidity</span><span class="value" id="humidityVal">--%</span></div>
+               </div>
+               <div class="atmos-item">
+                   <i class="fa-solid fa-eye"></i>
+                   <div><span class="label">Visibility</span><span class="value" id="visibilityVal">-- km</span></div>
+               </div>
+               <div class="atmos-item">
+                   <i class="fa-solid fa-gauge-high"></i>
+                   <div><span class="label">Pressure</span><span class="value" id="pressureVal">-- hPa</span></div>
+               </div>
+           </div>
+       </div>
+ 
+       <div class="highlight-card sun-card">
+         <h3>Sunrise & Sunset</h3>
+         <div class="sun-row">
+           <div class="sun-item">
+              <img src="assets/icons/sunrise.svg" width="40">
+              <div class="sun-info">
+                <span class="label">Sunrise</span>
+                <span class="value" id="sunriseTime">--</span>
+              </div>
+           </div>
+           <div class="sun-item">
+              <img src="assets/icons/sunset.svg" width="40">
+              <div class="sun-info">
+                <span class="label">Sunset</span>
+                <span class="value" id="sunsetTime">--</span>
+              </div>
+           </div>
+         </div>
+       </div>
+ 
+       <div class="highlight-card aqi-card">
+         <h3>Air Quality</h3>
+         <div class="aqi-top">
+             <div class="icon-small"><img src="assets/icons/activity.svg"></div>
+             <div class="aqi-text"><span id="aqiValue">--</span> <span id="aqiStatus">--</span></div>
+         </div>
+         <div class="aqi-bar"><div class="aqi-fill" id="aqiBarFill"></div></div>
+         <div class="aqi-details">
+             <div><span>PM2.5</span> <span id="pm25Value">--</span></div>
+             <div><span>SO2</span> <span id="so2Value">--</span></div>
+         </div>
+       </div>
+ 
+       <div class="highlight-card map-card full-width">
+         <h3>Live Location</h3>
+         <div id="map" style="height: 100%; width: 100%; border-radius: 0 0 24px 24px;"></div>
+       </div>
+ 
+     </div>
+ 
+     <h4 class="section-heading fade-in" id="dailyHeading">5-Day Forecast</h4>
+     <div class="weather-container fade-in" id="weatherContainer"></div>
+     
+     <div class="calendar-section glass-card fade-in">
+         <div class="calendar-header">
+             <span id="calMonthYear">January 2026</span>
+             <div class="cal-icon-wrapper"><i class="fa-regular fa-calendar"></i></div>
+         </div>
+         <div class="calendar-grid" id="calendarGrid"></div>
+     </div>
+ 
+     <div class="glass-card history-section fade-in" style="margin-bottom: 40px; padding: 25px;">
+         <div class="planner-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+             <h3 style="font-size:1.1rem; opacity:0.9;"><i class="fa-solid fa-clock-rotate-left" style="color:#e056fd; margin-right:8px;"></i> Time Travel</h3>
+             <p style="font-size:0.8rem; opacity:0.7;">Check past weather</p>
+         </div>
+         
+         <div class="history-controls" style="display:flex; gap:10px; margin-bottom:15px;">
+             <input type="date" id="historyDate" style="flex:1; padding:10px 15px; border-radius:10px; border:none; background:rgba(255,255,255,0.6); font-family:inherit;">
+             <button id="historyBtn" style="padding:10px 20px; border-radius:10px; border:none; background:#e056fd; color:white; font-weight:600; cursor:pointer; transition:0.3s;">Travel</button>
+         </div>
+ 
+         <div id="historyResult" style="display:none; text-align:center; padding:15px; background:rgba(255,255,255,0.2); border-radius:15px;"></div>
+     </div>
+ 
+     <div class="extras-grid fade-in">
+       <div class="glass-card extra-card moon-card">
+           <div class="extra-header">
+               <i class="fa-solid fa-moon"></i>
+               <span>Moon Phase</span>
+           </div>
+           <div class="moon-display">
+               <div class="moon-icon" id="moonIcon">🌕</div>
+               <div class="moon-text">
+                   <h3 id="moonPhaseName">--</h3>
+                   <p id="moonAge">Age: -- days</p>
+               </div>
+           </div>
+       </div>
+ 
+       <div class="glass-card extra-card trivia-card">
+           <div class="extra-header">
+               <i class="fa-solid fa-lightbulb"></i>
+               <span>Did You Know?</span>
+           </div>
+           <div class="trivia-content">
+               <p id="triviaText">Lightning strikes the Earth about 100 times every single second!</p>
+               <button id="newFactBtn" class="refresh-btn"><i class="fa-solid fa-rotate-right"></i></button>
+           </div>
+       </div>
+     </div>
+ 
+     <div class="glass-card fade-in" style="margin-bottom: 40px; padding: 25px;">
+         <div class="planner-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+             <h3 style="font-size:1.1rem; opacity:0.9;">
+                 <i class="fa-solid fa-envelope" style="color:#6c5ce7; margin-right:8px;"></i> Contact Us
+             </h3>
+             <p style="font-size:0.8rem; opacity:0.7;">We love feedback!</p>
+         </div>
+         
+         <div style="display:flex; flex-direction:column; gap:10px;">
+             <input type="text" id="contactName" placeholder="Your Name"
+                    style="padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.6); font-family:inherit;">
+             
+             <input type="email" id="contactEmail" placeholder="Your Email"
+                    style="padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.6); font-family:inherit;">
+             
+             <textarea id="contactMessage" placeholder="Tell us about your experience..." rows="3"
+                       style="padding:12px; border-radius:10px; border:none; background:rgba(255,255,255,0.6); font-family:inherit; resize: vertical;"></textarea>
+             
+             <button onclick="submitContact()"
+                     style="padding:12px; border-radius:10px; border:none; background:#6c5ce7; color:white; font-weight:600; cursor:pointer; transition:0.3s; margin-top:5px;">
+                 Send Message <i class="fa-solid fa-paper-plane"></i>
+             </button>
+             
+             <p id="contactResult" style="text-align:center; font-weight:600; font-size:0.9rem; margin-top:10px; min-height:20px;"></p>
+         </div>
+     </div>
+ 
+     <footer class="app-footer fade-in">
+         <p>Weather Some &copy; 2026</p>
+         <div class="social-links">
+             <i class="fa-brands fa-github"></i>
+             <i class="fa-brands fa-twitter"></i>
+             <i class="fa-brands fa-instagram"></i>
+         </div>
+         <p class="made-with">Designed with <i class="fa-solid fa-heart"></i> in Mumbai</p>
+     </footer>
+ 
+   </div>
+ 
+ </div>
+ 
+ <script src="script.js"></script>
+ 
+ <script>
+   if ('serviceWorker' in navigator) {
+       window.addEventListener('load', () => {
+           navigator.serviceWorker.register('/sw.js')
+               .then(reg => console.log('Service Worker registered!', reg))
+               .catch(err => console.log('Service Worker failed:', err));
+       });
+   }
+ </script>
+</body>
+</html>

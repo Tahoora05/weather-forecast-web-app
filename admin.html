@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+   <meta charset="UTF-8">
+
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+   <title>Admin Dashboard - Weather Some</title>
+
+   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+   <style>
+
+       body { font-family: 'Poppins', sans-serif; background: #1e1e2e; color: #fff; padding: 20px; }
+
+       h1 { text-align: center; color: #a29bfe; margin-bottom: 30px; }
+
+       .container { max-width: 1000px; margin: 0 auto; }
+
+       
+
+       .card { background: #2d2d44; border-radius: 15px; padding: 20px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+       .card h2 { border-bottom: 2px solid #a29bfe; padding-bottom: 10px; margin-bottom: 20px; font-size: 1.2rem; }
+
+       
+
+       table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+
+       th, td { padding: 12px; text-align: left; border-bottom: 1px solid #444; }
+
+       th { color: #a29bfe; font-weight: 600; }
+
+       tr:hover { background: rgba(255,255,255,0.05); }
+
+       .time { font-size: 0.85rem; opacity: 0.7; }
+
+       .empty-msg { text-align: center; opacity: 0.5; font-style: italic; padding: 20px; }
+
+       
+
+       .refresh-btn { display: block; margin: 0 auto 20px auto; padding: 10px 20px; background: #a29bfe; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+       .refresh-btn:hover { background: #6c5ce7; color: white; }
+
+   </style>
+
+</head>
+
+<body>
+
+ 
+
+   <div class="container">
+
+       <h1><i class="fa-solid fa-user-secret"></i> Secret Admin Panel</h1>
+
+       
+
+       <button class="refresh-btn" onclick="loadData()">Refresh Data</button>
+
+ 
+
+       <div class="card">
+
+           <h2><i class="fa-solid fa-envelope"></i> User Messages</h2>
+
+           <table>
+
+               <thead>
+
+                   <tr>
+
+                       <th>Name</th>
+
+                       <th>Email</th>
+
+                       <th>Message</th>
+
+                       <th>Time</th>
+
+                   </tr>
+
+               </thead>
+
+               <tbody id="msgTable"></tbody>
+
+           </table>
+
+           <p id="noMsg" class="empty-msg" style="display:none;">No messages yet.</p>
+
+       </div>
+
+ 
+
+       <div class="card">
+
+           <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Searches</h2>
+
+           <table>
+
+               <thead>
+
+                   <tr>
+
+                       <th>City Searched</th>
+
+                       <th>Time</th>
+
+                   </tr>
+
+               </thead>
+
+               <tbody id="searchTable"></tbody>
+
+           </table>
+
+       </div>
+
+   </div>
+
+ 
+
+   <script>
+
+       async function loadData() {
+
+           // 1. Load Messages
+
+           try {
+
+               const res = await fetch('http://localhost:3000/api/contact');
+
+               const data = await res.json();
+
+               const tbody = document.getElementById('msgTable');
+
+               tbody.innerHTML = '';
+
+               
+
+               if (data.length === 0) {
+
+                   document.getElementById('noMsg').style.display = 'block';
+
+               } else {
+
+                   document.getElementById('noMsg').style.display = 'none';
+
+                   data.forEach(item => {
+
+                       const date = new Date(item.sent_at).toLocaleString();
+
+                       tbody.innerHTML += `
+
+                           <tr>
+
+                               <td>${item.user_name}</td>
+
+                               <td>${item.user_email}</td>
+
+                               <td>${item.message}</td>
+
+                               <td class="time">${date}</td>
+
+                           </tr>
+
+                       `;
+
+                   });
+
+               }
+
+           } catch (err) { console.error("Error loading messages", err); }
+
+ 
+
+           // 2. Load History
+
+           try {
+
+               const res = await fetch('http://localhost:3000/api/history');
+
+               const data = await res.json();
+
+               const tbody = document.getElementById('searchTable');
+
+               tbody.innerHTML = '';
+
+               
+
+               data.forEach(item => {
+
+                   const date = new Date(item.searched_at).toLocaleString();
+
+                   tbody.innerHTML += `
+
+                       <tr>
+
+                           <td style="font-weight:bold; color:#ff7675;">${item.city_name}</td>
+
+                           <td class="time">${date}</td>
+
+                       </tr>
+
+                   `;
+
+               });
+
+           } catch (err) { console.error("Error loading history", err); }
+
+       }
+
+ 
+
+       // Load on start
+
+       loadData();
+
+   </script>
+
+</body>
+
+</html>
